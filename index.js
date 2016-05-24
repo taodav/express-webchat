@@ -7,7 +7,8 @@ var io = require('socket.io')(http);
 var MongoClient = require('mongodb').MongoClient;
 var mongoose = require('mongoose');
 var bodyParser = require('body-parser')
-mongoose.connect('mongodb://localhost/webchat');
+var dotenv = require('dotenv').config()
+mongoose.connect(process.env.MONGODB_URI);
 
 
 
@@ -20,11 +21,12 @@ io.on('connection', function(socket){
   socket.on('chat message', function(message){
     var newMessage = new Message
     newMessage.body = message
-    newMessage.save
-    Message.find({}, function(err, msg){
-      console.log(msg)
+    newMessage.save(function(err){
+      if (err){
+        console.log(err)
+      }
+      socket.broadcast.emit('chat message', message)
     })
-    socket.broadcast.emit('chat message', message)
   })
   socket.on('typing', function(message){
     socket.broadcast.emit('typing', message)
